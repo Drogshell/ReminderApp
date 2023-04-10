@@ -1,20 +1,20 @@
-﻿using System.Text;
+﻿using Spectre.Console;
 
 namespace ReminderApp
 {
-    internal static class ReminderApp
+    class ReminderApp
     {
         private static readonly List<Category> Categories = new List<Category>();
         private static readonly List<string> TaskOptions = new List<string>
-            { "Add Task", "Remove Task", "Change Task Priority", "Change Task Due Date", "Move Task", "Go Back" };
+            { "Add Task", "Remove Task", "Change Task Priority", "Change Task Due Date", "Rename Task" ,"Move Task", "Go Back" };
         private static readonly List<string> CategoryOptions = new List<string>
             { "Select Category", "Add Category", "Remove Category", "Rename Category", "Quit" };
-        private static int _tableWidth;
-        
-        static void Main(string[] args)
+
+        private static void Main(string[] args)
         {
             while (true)
             {
+                Console.Clear();
                 if (Categories.Count == 0)
                 {
                     PrintFreshStartMenu();
@@ -29,17 +29,20 @@ namespace ReminderApp
         private static void PrintFreshStartMenu()
         {
             Console.Clear();
-            var freshStartOptions = new List<string> { "Add Category", "Quit" };
-            var freshStartMenu = new Menu("Welcome to Task Manager! Please add a category to get started.",
-                freshStartOptions);
-            var freshStartChoice = freshStartMenu.Run();
+            var freshStartChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Hello! Please add some tasks to get started")
+                    .PageSize(10)
+                    .AddChoices(new[] {
+                        "Add Category", "Quit",
+                    }));
 
             switch (freshStartChoice)
             {
-                case 0:
+                case "Add Category":
                     AddCategory();
                     break;
-                case 1:
+                case "Quit":
                     ExitApplication();
                     break;
             }
@@ -48,35 +51,34 @@ namespace ReminderApp
         private static void PrintCategories()
         {
             Console.Clear();
-            _tableWidth = TableUtilities.GetConsoleTableWidth(Categories);
+            TableUtilities.PrintCategory(Categories);
 
-            TableUtilities.PrintLine(_tableWidth);
-            TableUtilities.PrintCategory(Categories, _tableWidth);
-            TableUtilities.PrintLine(_tableWidth);
-
-            var categoryMenu = new Menu("Categories", CategoryOptions);
-            var userChoice = categoryMenu.Run();
-
+            var userChoice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Categories")
+                    .PageSize(10)
+                    .AddChoices(CategoryOptions));
+            
             switch (userChoice)
             {
-                case 0:
+                case "Select Category":
                     SelectCategory();
                     break;
-                case 1:
+                case "Add Category":
                     AddCategory();
                     break;
-                case 2:
+                case "Remove Category":
                     RemoveCategory();
                     break;
-                case 3:
+                case "Rename Category":
                     RenameCategory();
                     break;
-                case 4:
+                case "Quit":
                     ExitApplication();
                     break;
             }
         }
-
+        
         private static void AddCategory()
         {
             CategoryUtilities.AddCategory(Categories);
@@ -90,7 +92,7 @@ namespace ReminderApp
 
         private static void RemoveCategory()
         {
-           CategoryUtilities.RemoveCategory(Categories);
+            CategoryUtilities.RemoveCategory(Categories);
         }
 
         private static void RenameCategory()
@@ -106,23 +108,23 @@ namespace ReminderApp
         {
             while (true)
             {
-                Menu taskMenu;
                 if (category.Tasks.Count == 0)
                 {
                     Console.Clear();
-                    TaskUtilities.PrintToConsoleInColor(@"That category has no tasks", ConsoleColor.Red);
-
+                    AnsiConsole.MarkupLine("[bold yellow on black]NO TASKS TO DISPLAY![/]");
                     var miniTaskOptions = new List<string> { TaskOptions[0], TaskOptions[5] };
-
-                    var cursorTopOffset = (category.Tasks.Count + 2) * 2;
-                    taskMenu = new Menu("Tasks", miniTaskOptions, cursorTopOffset);
-                    var userChoice = taskMenu.Run();
+                    var userChoice = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title("Get Started by adding some tasks")
+                            .PageSize(10)
+                            .AddChoices(miniTaskOptions));
+                    
                     switch (userChoice)
                     {
-                        case 0:
+                        case "Add Task":
                             AddTask(category);
                             break;
-                        case 1:
+                        case "Go Back":
                             Console.WriteLine("< < < Going back");
                             Thread.Sleep(1500);
                             break;
@@ -131,38 +133,64 @@ namespace ReminderApp
                 else
                 {
                     PrintTasks(category);
-                    var cursorTopOffset = (category.Tasks.Count + 2) * 2;
-                    taskMenu = new Menu("Tasks", TaskOptions, cursorTopOffset);
-                    var userChoice = taskMenu.Run();
+                    var userChoice = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title("Current Tasks")
+                            .PageSize(10)
+                            .AddChoices(TaskOptions));
+                    
                     switch (userChoice)
                     {
                         //Add a new task
-                        case 0:
+                        case "Add Task":
                             AddTask(category);
                             break;
                         //Remove a task
-                        case 1:
+                        case "Remove Task":
                             RemoveTask(category);
                             break;
                         //Change the priority of a task
-                        case 2:
+                        case "Change Task Priority":
                             ChangeTaskPriority(category);
                             break;
                         //Change the due date of a task
-                        case 3:
+                        case "Change Task Due Date":
                             ChangeTaskDueDate(category);
                             break;
+                        //rename Task
+                        case "Rename Task":
+                            Console.Clear();
+                            
+                            var userRenameChoice = AnsiConsole.Prompt(
+                                new SelectionPrompt<CategoryTask>()
+                                    .Title("Which task would you like to re-name?")
+                                    .PageSize(10)
+                                    .AddChoices(category.GetAllTasks()));
+                            
+                            var newDescription = AnsiConsole.Ask<string>("Enter new description");
+                            RenameTask(newDescription, userRenameChoice);
+                            break;
                         //Move a task
-                        case 4:
+                        case "Move Task":
                             MoveTask(category);
+                            break;
+                        case "Go Back":
+                            AnsiConsole.MarkupLine("[green]< < < Going back[/]");
+                            Thread.Sleep(1500);
                             break;
                     }
                 }
-
                 break;
             }
         }
-        
+
+        private static void RenameTask(string readString, CategoryTask task)
+        {
+            if (!task.RenameTask(readString)) return;
+            AnsiConsole.MarkupLine("[green]Success![/]");
+            Thread.Sleep(1500);
+        }
+
         private static void AddTask(Category category)
         {
             TaskUtilities.AddTask(category);
@@ -189,7 +217,7 @@ namespace ReminderApp
         
         private static void PrintTasks(Category category)
         {
-            TaskUtilities.PrintTasks(category);
+            TableUtilities.PrintTasks(category);
         }
         
         private static void ExitApplication()

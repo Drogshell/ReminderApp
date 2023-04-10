@@ -1,4 +1,6 @@
-﻿namespace ReminderApp;
+﻿using Spectre.Console;
+
+namespace ReminderApp;
 
 public enum PriorityLevelType
 {
@@ -6,15 +8,18 @@ public enum PriorityLevelType
     Medium,
     Low
 }
-class PriorityLevel
+
+public class PriorityLevel
 {
-    public static void PrintPriorityLevels()
+    public static PriorityLevelType GetPriorityLevel()
     {
-        Console.WriteLine("\nWhat level of priority is this task?\n");
-        var priorityTypes = Enum.GetNames(typeof(PriorityLevelType));
-        for (var i = 0; i < priorityTypes.Length; i++)
-        {
-            Console.WriteLine($"{i + 1}) " + priorityTypes[i]);
-        }
+        var enumNames = Enum.GetNames(typeof(PriorityLevelType));
+        var priorityType = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Priority Level?")
+                .PageSize(10)
+                .AddChoices(enumNames));
+        
+        return (PriorityLevelType)Enum.Parse(typeof(PriorityLevelType), priorityType);
     }
 }

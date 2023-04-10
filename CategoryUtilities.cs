@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Spectre.Console;
 
 namespace ReminderApp
 {
@@ -9,42 +7,50 @@ namespace ReminderApp
         public static void AddCategory(List<Category> categories)
         {
             Console.Clear();
-            var categoryName = UserInputUtilities.ReadString("Enter a name for the new category:");
+            var categoryName = AnsiConsole.Ask<string>("Enter a name for the new category:");
             categories.Add(new Category(categoryName));
         }
 
         public static Category SelectCategory(List<Category> categories)
         {
             Console.Clear();
-            var selectCategoryMenu = new Menu("Select a category to manage tasks",
-                categories.Select(cat => cat.Title).ToList());
-            var selectedIndex = selectCategoryMenu.Run();
+            var selectedIndex = AnsiConsole.Prompt(
+                    new SelectionPrompt<(string, int)>()
+                        .Title("Select a category")
+                        .PageSize(10)
+                        .AddChoices(categories.Select((cat, index) => (cat.Title, index)))
+                        .UseConverter(t => t.Item1)).Item2;
             return categories[selectedIndex];
         }
 
         public static void RemoveCategory(List<Category> categories)
         {
             Console.Clear();
-            var removeCategoryMenu =
-                new Menu("Select a category to remove", categories.Select(cat => cat.Title).ToList());
-            var selectedIndex = removeCategoryMenu.Run();
-            categories.RemoveAt(selectedIndex);
-
-            Console.WriteLine("Category removed successfully.");
+            var selectedIndex = AnsiConsole.Prompt(
+                    new SelectionPrompt<(string, int)>()
+                        .Title("Select a category to remove")
+                        .PageSize(10)
+                        .AddChoices(categories.Select((cat, index) => (cat.Title, index)))
+                        .UseConverter(t => t.Item1)).Item2;
+            
+            AnsiConsole.MarkupLine($"[red]Removing \"{categories[selectedIndex]}\"[/]");
             Thread.Sleep(1500);
+            categories.RemoveAt(selectedIndex);
         }
 
         public static void RenameCategory(List<Category> categories)
         {
             Console.Clear();
-            var renameCategoryMenu =
-                new Menu("Select a category to rename", categories.Select(cat => cat.Title).ToList());
-            var selectedIndex = renameCategoryMenu.Run();
-
-            var newName = UserInputUtilities.ReadString("Enter the new name for the category:");
-            categories[selectedIndex].Title = newName;
-
-            Console.WriteLine("Category renamed successfully.");
+            var selectedIndex = AnsiConsole.Prompt(
+                    new SelectionPrompt<(string, int)>()
+                        .Title("Select a category to rename")
+                        .PageSize(10)
+                        .AddChoices(categories.Select((cat, index) => (cat.Title, index)))
+                        .UseConverter(t => t.Item1)).Item2;
+            
+            var newCategoryName = AnsiConsole.Ask<string>("Enter a name for the new category:");
+            categories[selectedIndex].Title = newCategoryName;
+            AnsiConsole.MarkupLine($"[green]Success! Renamed {categories[selectedIndex]}[/]");
             Thread.Sleep(1500);
         }
     }

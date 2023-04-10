@@ -5,8 +5,9 @@ namespace ReminderApp;
 public class CategoryTask
 {
     private DateTime _dueDate;
-    private string TaskDescription { get; }
-    private DateTime DueDate
+    public string TaskDescription { get; private set; }
+
+    public DateTime DueDate
     {
         get
         {
@@ -14,7 +15,7 @@ public class CategoryTask
             return _dueDate;
         }
 
-        set
+        private set
         {
             _dueDate = value;
             UpdateTimeSpan();
@@ -38,6 +39,22 @@ public class CategoryTask
     private void UpdateTimeSpan()
     {
         TimeSpan = _dueDate - DateTime.Now;
+    }
+    
+    public bool RenameTask(string newDescription)
+    {
+        TaskDescription = newDescription;
+        return true;
+    }
+    public bool IsDueSoon()
+    {
+        var timeToDue = DueDate - DateTime.Now;
+        return timeToDue.TotalDays <= 3 && timeToDue.TotalDays > 0;
+    }
+
+    public bool IsOverdue()
+    {
+        return DateTime.Now > DueDate;
     }
 
     public override string ToString()

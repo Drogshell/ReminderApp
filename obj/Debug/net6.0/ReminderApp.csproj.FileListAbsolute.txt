@@ -13,3 +13,5 @@ C:\Active Dev Projects\RiderProjects\ReminderApp\obj\Debug\net6.0\refint\Reminde
 C:\Active Dev Projects\RiderProjects\ReminderApp\obj\Debug\net6.0\ReminderApp.pdb
 C:\Active Dev Projects\RiderProjects\ReminderApp\obj\Debug\net6.0\ReminderApp.genruntimeconfig.cache
 C:\Active Dev Projects\RiderProjects\ReminderApp\obj\Debug\net6.0\ref\ReminderApp.dll
+C:\Active Dev Projects\RiderProjects\ReminderApp\bin\Debug\net6.0\Spectre.Console.dll
+C:\Active Dev Projects\RiderProjects\ReminderApp\obj\Debug\net6.0\ReminderApp.csproj.CopyComplete

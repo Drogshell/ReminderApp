@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "Ron1roe5LhdLPZvKuEPwzjdzCj7iy7lWBPuYkfLZ7FcxDGLNzEg/tfHUYG7/3iMdzlBSUEACktiTXuMq/vjirQ==",
+  "dgSpecHash": "FY/5o+DgDSe103YImEjDTA/em+3dLeA0f190NJpIpEoEPe2yypUzZS5YDDEcyYP1Hb7ZBA0mN3565TdmQ51oWQ==",
   "success": true,
   "projectFilePath": "C:\\Active Dev Projects\\RiderProjects\\ReminderApp\\ReminderApp.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\trevi\\.nuget\\packages\\spectre.console\\0.46.0\\spectre.console.0.46.0.nupkg.sha512",
+    "C:\\Users\\trevi\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
     "C:\\Users\\trevi\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.15\\microsoft.netcore.app.ref.6.0.15.nupkg.sha512",
     "C:\\Users\\trevi\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.15\\microsoft.windowsdesktop.app.ref.6.0.15.nupkg.sha512",
     "C:\\Users\\trevi\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.15\\microsoft.aspnetcore.app.ref.6.0.15.nupkg.sha512",

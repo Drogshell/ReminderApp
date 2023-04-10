@@ -32,17 +32,15 @@ public class Category
         return Tasks.Remove(task);
     }
 
-    public bool RenameTask(string newDescription)
-    {
-        Title = newDescription;
-        return true;
-    }
-
+    
     public CategoryTask GetSingleTask(int index)
     {
-        // If the index is less than 0 or greater than the total amount of items in the task list throw an exception
-        // Otherwise return the task
         return (index < 0 || index > Tasks.Count) ? throw new IndexOutOfRangeException("That index is out of range") : Tasks[index];
+    }
+    
+    public List<CategoryTask> GetAllTasks()
+    {
+        return _tasks;
     }
 
     public override string ToString()
