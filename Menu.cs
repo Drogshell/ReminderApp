@@ -2,66 +2,47 @@
 
 public class Menu
 {
-    public int SelectedIndex { get; set; }
-    public string Prompt { get; }
-    public List<string> Options { get; }
-    public int CursorLeft { get; set; }
-    public int CursorTop { get; set; }
+    private int SelectedIndex { get; set; }
+    private string Prompt { get; }
+    private List<string> Options { get; }
+    private int CursorTopOffset { get; }
 
-    public Menu(string prompt, List<string> options)
+    public Menu(string prompt, List<string> options, int cursorTopOffset = 6)
     {
         Prompt = prompt;
         Options = options;
         SelectedIndex = 0;
+        CursorTopOffset = cursorTopOffset;
     }
-
-    public void SetCursorPosition(int left, int top)
-    {
-        CursorLeft = left;
-        CursorTop = top;
-    }
-
+    
     public int Run()
     {
         ConsoleKey keyPressed;
-
         do
         {
-            Console.SetCursorPosition(CursorLeft, CursorTop);
-            DisplayOptions();
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            DisplayOptions(CursorTopOffset);
+            var keyInfo = Console.ReadKey(intercept: true);
             keyPressed = keyInfo.Key;
 
-            if (keyPressed == ConsoleKey.UpArrow)
+            SelectedIndex = keyPressed switch
             {
-                SelectedIndex--;
-                if (SelectedIndex == -1)
-                {
-                    SelectedIndex = Options.Count - 1;
-                }
-            }
-            else if (keyPressed == ConsoleKey.DownArrow)
-            {
-                SelectedIndex++;
-                if (SelectedIndex == Options.Count)
-                {
-                    SelectedIndex = 0;
-                }
-            }
-
+                ConsoleKey.UpArrow => (SelectedIndex == 0) ? Options.Count - 1 : SelectedIndex - 1,
+                ConsoleKey.DownArrow => (SelectedIndex == Options.Count - 1) ? 0 : SelectedIndex + 1,
+                _ => SelectedIndex
+            };
         } while (keyPressed != ConsoleKey.Enter);
-
         return SelectedIndex;
     }
-
-    private void DisplayOptions()
+    
+    private void DisplayOptions(int cursorTopOffset = 6)
     {
+        Console.SetCursorPosition(0, cursorTopOffset);
         Console.WriteLine(Prompt);
-        char prefix; 
 
-        for (int i = 0; i < Options.Count; i++)
+        for (var i = 0; i < Options.Count; i++)
         {
             var currentlySelected = Options[i];
+            char prefix;
             if (i == SelectedIndex)
             {
                 Console.ForegroundColor = ConsoleColor.Black;

@@ -6,13 +6,9 @@ public class UserInputUtilities
 {
     public static string ReadString(string prompt)
     {
-        if (prompt == null)
-        {
-            throw new ArgumentNullException(null, "A prompt must be passed!");
-        }
-
+        CheckPromptForNull(prompt);
         Console.WriteLine(prompt);
-        bool isValid = false;
+        var isValid = false;
         var buffer = Console.ReadLine();
         do
         {
@@ -32,14 +28,10 @@ public class UserInputUtilities
 
     public static int ReadInt(string prompt)
     {
-        if (prompt == null)
-        {
-            throw new ArgumentNullException(null, "A prompt must be passed!");
-        }
-
-        bool isValid = false;
+        CheckPromptForNull(prompt);
+        var isValid = false;
         var buffer = ReadString(prompt);
-        int result = 0;
+        var result = 0;
         do
         {
             try
@@ -60,36 +52,39 @@ public class UserInputUtilities
 
     public static DateTime GetDate()
     {
-        DateTime userDate;
-        var AUCulture = new CultureInfo("en-AU");
+        var auCulture = new CultureInfo("en-AU");
 
-        string dateString = UserInputUtilities.ReadString("\nWhen is this task due?\nSpecify a date with the format: "
-                                                          + AUCulture.DateTimeFormat.ShortDatePattern
-                                                          + " h:mm AM/PM");
+        var dateString = ReadString("\nWhen is this task due?\nSpecify a date with the format: "
+                                                       + auCulture.DateTimeFormat.ShortDatePattern
+                                                       + " h:mm AM/PM");
 
         while (true)
         {
-            if (DateTime.TryParseExact(dateString, "g", AUCulture, DateTimeStyles.AllowWhiteSpaces, out userDate))
+            if (DateTime.TryParseExact(dateString, "g", auCulture, DateTimeStyles.AllowWhiteSpaces, out var userDate))
             {
-                if (userDate < DateTime.Now)
-                {
-                    Console.WriteLine("You can't set a due date in the past!");
-                    dateString = UserInputUtilities.ReadString("\nTry again. Specify a date with the format: "
-                                                               + AUCulture.DateTimeFormat.ShortDatePattern
-                                                               + " h:mm AM/PM");
-                    continue;
-                }
-                return userDate;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Not a valid date");
-                Console.ResetColor();
-                dateString = UserInputUtilities.ReadString("Please enter the date in the exact format: "
-                                                           + AUCulture.DateTimeFormat.ShortDatePattern
+                if (userDate >= DateTime.Now) return userDate;
+                
+                Console.WriteLine("You can't set a due date in the past!");
+                dateString = ReadString("\nTry again. Specify a date with the format: "
+                                                           + auCulture.DateTimeFormat.ShortDatePattern
                                                            + " h:mm AM/PM");
+                continue;
             }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Not a valid date");
+            Console.ResetColor();
+            dateString = ReadString("Please enter the date in the exact format: "
+                                    + auCulture.DateTimeFormat.ShortDatePattern
+                                    + " h:mm AM/PM");
+        }
+    }
+    
+    private static void CheckPromptForNull(string prompt)
+    {
+        if (prompt == null)
+        {
+            throw new ArgumentNullException(null, "A prompt must be passed!");
         }
     }
 }

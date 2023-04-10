@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "DHEBKvK4yripvukk6f4SXovTS3QVwdNCfuQBz1F5EOUkPXaj81NazNMyNV0DUOenILQoYSt7awdgGy8URnYxtQ==",
+  "dgSpecHash": "Ron1roe5LhdLPZvKuEPwzjdzCj7iy7lWBPuYkfLZ7FcxDGLNzEg/tfHUYG7/3iMdzlBSUEACktiTXuMq/vjirQ==",
   "success": true,
   "projectFilePath": "C:\\Active Dev Projects\\RiderProjects\\ReminderApp\\ReminderApp.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\trevi\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.15\\microsoft.netcore.app.ref.6.0.15.nupkg.sha512",
+    "C:\\Users\\trevi\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.15\\microsoft.windowsdesktop.app.ref.6.0.15.nupkg.sha512",
+    "C:\\Users\\trevi\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.15\\microsoft.aspnetcore.app.ref.6.0.15.nupkg.sha512",
+    "C:\\Users\\trevi\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\6.0.15\\microsoft.netcore.app.host.win-x64.6.0.15.nupkg.sha512"
+  ],
   "logs": []
 }

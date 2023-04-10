@@ -4,11 +4,9 @@ namespace ReminderApp;
 
 public class CategoryTask
 {
-    private TimeSpan _timeSpan;
     private DateTime _dueDate;
-
-    public string TaskDescription { get; set; }
-    public DateTime DueDate
+    private string TaskDescription { get; }
+    private DateTime DueDate
     {
         get
         {
@@ -23,7 +21,7 @@ public class CategoryTask
         }
     }
     public PriorityLevelType Priority { get; set; }
-    public TimeSpan TimeSpan { get { return _timeSpan; } set { _timeSpan = value; } }
+    public TimeSpan TimeSpan { get; private set; }
 
     public CategoryTask(string description, DateTime dueDate, PriorityLevelType priorityLevel)
     {
@@ -37,39 +35,34 @@ public class CategoryTask
         DueDate = date;
     }
 
-    public void UpdateTimeSpan()
+    private void UpdateTimeSpan()
     {
         TimeSpan = _dueDate - DateTime.Now;
     }
 
     public override string ToString()
     {
-        StringBuilder stringBuilder = new StringBuilder();
+        var stringBuilder = new StringBuilder();
         stringBuilder.Append($"{TaskDescription} | {DueDate}");
         UpdateTimeSpan();
 
-        if (TimeSpan.Days <= 0)
+        switch (TimeSpan.Days)
         {
-            if (TimeSpan.Hours == 0)
-            {
-                stringBuilder.Append((TimeSpan.Minutes == 1) ? $" | Due in {TimeSpan.Minutes} minute" : $" | Due in {TimeSpan.Minutes} minutes");
-            }
-            else if (TimeSpan.Hours == 1)
-            {
-                stringBuilder.Append((TimeSpan.Minutes == 1) ? $" | Due in {TimeSpan.Hours} hour and {TimeSpan.Minutes} minute" : $" | Due in {TimeSpan.Hours} hour and {TimeSpan.Minutes} minutes");
-            }
-            else
-            {
+            case <= 0 when TimeSpan.Hours == 0:
+                stringBuilder.Append(TimeSpan.Minutes == 1 ? $" | Due in {TimeSpan.Minutes} minute" : $" | Due in {TimeSpan.Minutes} minutes");
+                break;
+            case <= 0 when TimeSpan.Hours == 1:
+                stringBuilder.Append(TimeSpan.Minutes == 1 ? $" | Due in {TimeSpan.Hours} hour and {TimeSpan.Minutes} minute" : $" | Due in {TimeSpan.Hours} hour and {TimeSpan.Minutes} minutes");
+                break;
+            case <= 0:
                 stringBuilder.Append($" | Due in {TimeSpan.Hours} hours and {TimeSpan.Minutes} minutes");
-            }
-        }
-        else if (TimeSpan.Days == 1)
-        {
-            stringBuilder.Append($" | Due in {TimeSpan.Days} day and {TimeSpan.Hours} hours");
-        }
-        else
-        {
-            stringBuilder.Append($" | Due in {TimeSpan.Days} days and {TimeSpan.Hours} hours");
+                break;
+            case 1:
+                stringBuilder.Append($" | Due in {TimeSpan.Days} day and {TimeSpan.Hours} hours");
+                break;
+            default:
+                stringBuilder.Append($" | Due in {TimeSpan.Days} days and {TimeSpan.Hours} hours");
+                break;
         }
         return stringBuilder.ToString();
     }

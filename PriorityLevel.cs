@@ -12,7 +12,7 @@ class PriorityLevel
     {
         Console.WriteLine("\nWhat level of priority is this task?\n");
         var priorityTypes = Enum.GetNames(typeof(PriorityLevelType));
-        for (int i = 0; i < priorityTypes.Length; i++)
+        for (var i = 0; i < priorityTypes.Length; i++)
         {
             Console.WriteLine($"{i + 1}) " + priorityTypes[i]);
         }

@@ -2,7 +2,7 @@
 
 public class Category
 {
-    private List<CategoryTask> _tasks = new List<CategoryTask>();
+    private List<CategoryTask> _tasks = new();
 
     public string Title { get; set; }
 
@@ -13,10 +13,6 @@ public class Category
             // Gets the tracked tasks ordered by its priority and then by its TimeSpan.
             _tasks = _tasks.OrderBy(task => (int)task.Priority).ThenBy(task => task.TimeSpan).ToList();
             return _tasks;
-        }
-        set
-        {
-            _tasks = value;
         }
     }
 
