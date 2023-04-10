@@ -9,9 +9,36 @@ namespace ReminderApp
             { "Add Task", "Remove Task", "Change Task Priority", "Change Task Due Date", "Rename Task" ,"Move Task", "Go Back" };
         private static readonly List<string> CategoryOptions = new List<string>
             { "Select Category", "Add Category", "Remove Category", "Rename Category", "Quit" };
-
+        
         private static void Main(string[] args)
         {
+            var work = new Category("Work");
+            work.AddTask(new CategoryTask("Finish project proposal",
+                new DateTime(2023, 4, 11), PriorityLevelType.High));
+            work.AddTask(new CategoryTask("Update meeting agenda", new DateTime(2023, 4, 12), PriorityLevelType.Medium));
+            work.AddTask(new CategoryTask("Email client about progress", new DateTime(2023, 4, 13),
+                PriorityLevelType.Low));
+
+            var personal = new Category("Personal");
+            personal.AddTask(new CategoryTask("Schedule dentist appointment", new DateTime(2023, 4, 14),
+                PriorityLevelType.Low));
+            personal.AddTask(new CategoryTask("Buy birthday gift for friend", new DateTime(2023, 4, 16),
+                PriorityLevelType.Medium));
+            personal.AddTask(new CategoryTask("Book flight tickets for vacation", new DateTime(2023, 4, 20),
+                PriorityLevelType.High));
+
+            var fitness = new Category("Fitness");
+            fitness.AddTask(new CategoryTask("Join a yoga class", new DateTime(2023, 4, 22), PriorityLevelType.Medium));
+            fitness.AddTask(new CategoryTask("Buy new running shoes", new DateTime(2023, 4, 25),
+                PriorityLevelType.Low));
+
+            var empty = new Category("Empty Category");
+            
+            Categories.Add(work);
+            Categories.Add(personal);
+            Categories.Add(fitness);
+            Categories.Add(empty);
+            
             while (true)
             {
                 Console.Clear();
@@ -112,7 +139,7 @@ namespace ReminderApp
                 {
                     Console.Clear();
                     AnsiConsole.MarkupLine("[bold yellow on black]NO TASKS TO DISPLAY![/]");
-                    var miniTaskOptions = new List<string> { TaskOptions[0], TaskOptions[5] };
+                    var miniTaskOptions = new List<string> { TaskOptions[0], TaskOptions[6] };
                     var userChoice = AnsiConsole.Prompt(
                         new SelectionPrompt<string>()
                             .Title("Get Started by adding some tasks")

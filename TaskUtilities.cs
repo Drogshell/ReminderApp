@@ -15,10 +15,28 @@ namespace ReminderApp
         
         public static void RemoveTask(Category category)
         {
-            //Console.Clear();
-            // var removeTaskMenu = new Menu("Which task would you like to remove?", category.Tasks.Select(task => task.ToString()).ToList());
-            // var taskToRemove = category.GetSingleTask(removeTaskMenu.Run());
-            //category.RemoveTask(taskToRemove);
+            Console.Clear();
+            var tasks = AnsiConsole.Prompt(
+                new MultiSelectionPrompt<string>()
+                    .Title("Choose which tasks you want to be [red]deleted.[/]")
+                    .NotRequired() // Not required to have a favorite fruit
+                    .PageSize(10)
+                    .MoreChoicesText("[grey](Move up and down to reveal more tasks)[/]")
+                    .InstructionsText(
+                        "[grey](Press [blue]<space>[/] to toggle a task, " + 
+                        "[green]<enter>[/] to accept)[/]")!
+                    .AddChoices(category.Tasks.Select(task => task.ToString()).ToList()));
+            
+            var indexesToRemove = tasks
+                .Select(selectedTask => category.Tasks.FindIndex(task => task.ToString() == selectedTask))
+                .Where(index => index >= 0)
+                .OrderByDescending(index => index)
+                .ToList();
+
+            foreach (var task in indexesToRemove.Select(category.GetSingleTask))
+            {
+                category.RemoveTask(task);
+            }
         }
         
         public static void UpdateTaskPriority(Category category)
