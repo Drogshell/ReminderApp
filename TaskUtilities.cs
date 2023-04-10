@@ -42,60 +42,106 @@ namespace ReminderApp
         public static void UpdateTaskPriority(Category category)
         {
             Console.Clear();
-            // var updateTaskPriority = new Menu("Which task would you like to change the priority for?", category.Tasks.Select(task => task.ToString()).ToList());
-            // var taskToUpdate = category.GetSingleTask(updateTaskPriority.Run());
-            // Console.Clear();
-            // updateTaskPriority = new Menu("Select the new priority", Enum.GetNames(typeof(PriorityLevelType)).ToList());
-            // var priority = updateTaskPriority.Run();
-            // var type = (PriorityLevelType)priority;
-            //taskToUpdate.Priority = type;
+            
+            var taskStrings = category.Tasks.Select(task => task.ToString()).ToList();
+
+            var selectedTask = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Which task would you like to change the priority for?")
+                    .PageSize(10)
+                    .AddChoices(taskStrings));
+
+            int selectedIndex = taskStrings.IndexOf(selectedTask);
+            var taskToUpdate = category.GetSingleTask(selectedIndex);
+
+            Console.Clear();
+    
+            var newPriority = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select the new priority")
+                    .PageSize(10)
+                    .AddChoices(Enum.GetNames(typeof(PriorityLevelType)).ToList()));
+
+            var type = Enum.Parse<PriorityLevelType>(newPriority);
+            taskToUpdate.Priority = type;
+
         }
         
         public static void UpdateTaskDueDate(Category category)
         {
             Console.Clear();
-            // var updateTaskDate = new Menu("Which task would you like to change the due date for?", category.Tasks.Select(task => task.ToString()).ToList());
-            // var task = category.GetSingleTask(updateTaskDate.Run());
-            // task.ChangeDueDate(UserInputUtilities.GetDate());
-            // PrintToConsoleInColor($"Date has been changed", ConsoleColor.Green);
+
+            var taskStrings = category.Tasks.Select(task => task.ToString()).ToList();
+            var selectedTask = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Which task would you like to change the due date for?")
+                    .PageSize(10)
+                    .AddChoices(taskStrings));
+
+            int selectedIndex = taskStrings.IndexOf(selectedTask);
+            var taskToUpdate = category.GetSingleTask(selectedIndex);
+
+            var newDueDate = AnsiConsole.Ask<DateTime>("Enter the new due date (yyyy-mm-dd):");
+            taskToUpdate.ChangeDueDate(newDueDate);
+
+            AnsiConsole.MarkupLine("[green]Date has been changed[/]");
             Thread.Sleep(1500);
         }
         
         public static void MoveTask(Category category, List<Category> categories)
         {
-            // if (categories.Count == 1)
-            // {
-            //     PrintToConsoleInColor("You only have one category", ConsoleColor.Red);
-            //     Thread.Sleep(1500);
-            //     return;
-            // }
-            //
-            // // Get the task to move
-            // Console.Clear();
-            // var moveTask = new Menu("Which task would you like to move?", category.Tasks.Select(task => task.ToString()).ToList());
-            // var taskToMove = category.GetSingleTask(moveTask.Run());
-            //
-            // Console.Clear();
-            // // Get the index of category
-            // moveTask = new Menu("Which category would you like to move the task to?", categories.Select(cat => cat.ToString()).ToList());
-            //
-            // // Loop if the user selects the same category
-            // var categoryIndex = moveTask.Run();
-            // while (categories[categoryIndex].Equals(category))
-            // {
-            //     PrintToConsoleInColor("You can't select the same category.", ConsoleColor.Red);
-            //     categoryIndex = moveTask.Run();
-            // }
-            //
-            // // Get the respective category from the category collection
-            // var moveIntoCategory = categories[categoryIndex];
-            // moveIntoCategory.AddTask(taskToMove);
-            // category.RemoveTask(taskToMove);
-            //
-            // PrintToConsoleInColor($"Task was successfully moved into {moveIntoCategory.Title}", ConsoleColor.Green);
-            // Thread.Sleep(2500);
+            if (categories.Count == 1)
+            {
+                AnsiConsole.MarkupLine("[red]You only have one category[/]");
+                Thread.Sleep(1500);
+                return;
+            }
+
+            // Get the task to move
+            Console.Clear();
+            var taskStrings = category.Tasks.Select(task => task.ToString()).ToList();
+            var selectedTask = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Which task would you like to move?")
+                    .PageSize(10)
+                    .AddChoices(taskStrings));
+
+            int selectedIndex = taskStrings.IndexOf(selectedTask);
+            var taskToMove = category.GetSingleTask(selectedIndex);
+
+            Console.Clear();
+            // Get the index of category
+            var categoryStrings = categories.Select(cat => cat.ToString()).ToList();
+            var selectedCategory = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Which category would you like to move the task to?")
+                    .PageSize(10)
+                    .AddChoices(categoryStrings));
+
+            int categoryIndex = categoryStrings.IndexOf(selectedCategory);
+
+            // Loop if the user selects the same category
+            while (categories[categoryIndex].Equals(category))
+            {
+                AnsiConsole.MarkupLine("[red]You can't select the same category.[/]");
+                selectedCategory = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Which category would you like to move the task to?")
+                        .PageSize(10)
+                        .AddChoices(categoryStrings));
+                categoryIndex = categoryStrings.IndexOf(selectedCategory);
+            }
+
+            // Get the respective category from the category collection
+            var moveIntoCategory = categories[categoryIndex];
+            moveIntoCategory.AddTask(taskToMove);
+            category.RemoveTask(taskToMove);
+
+            AnsiConsole.MarkupLine($"[green]Task was successfully moved into {moveIntoCategory.Title}[/]");
+            Thread.Sleep(2500);
         }
-        public static DateTime GetDate()
+
+        private static DateTime GetDate()
         {
             DateTime date;
             while (true)

@@ -12,6 +12,7 @@ namespace ReminderApp
         
         private static void Main(string[] args)
         {
+            //------------------------Seed data-----------------------------//
             var work = new Category("Work");
             work.AddTask(new CategoryTask("Finish project proposal",
                 new DateTime(2023, 4, 11), PriorityLevelType.High));
@@ -38,6 +39,7 @@ namespace ReminderApp
             Categories.Add(personal);
             Categories.Add(fitness);
             Categories.Add(empty);
+            //----------------------------------------------------------------//
             
             while (true)
             {
