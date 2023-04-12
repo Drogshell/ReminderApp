@@ -5,27 +5,21 @@ namespace ReminderApp
 {
     public static class TaskUtilities
     {
+        private const int Delay = 1000;
         public static void AddTask(Category category)
         {
             var description = AnsiConsole.Ask<string>("Enter the description of the task: ");
+            TableUtilities.PrintTasks(category);
             var priorityLevel = PriorityLevel.GetPriorityLevel();
             var userDate = GetDate();
-            category.AddTask(new CategoryTask(description, userDate, priorityLevel));
+            category.AddTask(new Task(description, userDate, priorityLevel));
         }
         
         public static void RemoveTask(Category category)
         {
             Console.Clear();
-            var tasks = AnsiConsole.Prompt(
-                new MultiSelectionPrompt<string>()
-                    .Title("Choose which tasks you want to be [red]deleted.[/]")
-                    .NotRequired() // Not required to have a favorite fruit
-                    .PageSize(10)
-                    .MoreChoicesText("[grey](Move up and down to reveal more tasks)[/]")
-                    .InstructionsText(
-                        "[grey](Press [blue]<space>[/] to toggle a task, " + 
-                        "[green]<enter>[/] to accept)[/]")!
-                    .AddChoices(category.Tasks.Select(task => task.ToString()).ToList()));
+            var tasks = PromptUtilities.PromptMultiSelection("Choose which tasks you want to be [red]deleted.[/]",
+                category.Tasks.Select(task => task.ToString()).ToList(), false);
             
             var indexesToRemove = tasks
                 .Select(selectedTask => category.Tasks.FindIndex(task => task.ToString() == selectedTask))
@@ -42,93 +36,64 @@ namespace ReminderApp
         public static void UpdateTaskPriority(Category category)
         {
             Console.Clear();
-            
             var taskStrings = category.Tasks.Select(task => task.ToString()).ToList();
-
-            var selectedTask = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Which task would you like to change the priority for?")
-                    .PageSize(10)
-                    .AddChoices(taskStrings));
-
-            int selectedIndex = taskStrings.IndexOf(selectedTask);
+            var selectedTask = PromptUtilities.PromptSelection("Which task would you like to change the priority for?", taskStrings);
+            var selectedIndex = taskStrings.IndexOf(selectedTask);
             var taskToUpdate = category.GetSingleTask(selectedIndex);
-
+            
             Console.Clear();
-    
-            var newPriority = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Select the new priority")
-                    .PageSize(10)
-                    .AddChoices(Enum.GetNames(typeof(PriorityLevelType)).ToList()));
-
+            var newPriority = PromptUtilities.PromptSelection("Select the new priority",
+                Enum.GetNames(typeof(PriorityLevelType)).ToList());
+            
             var type = Enum.Parse<PriorityLevelType>(newPriority);
             taskToUpdate.Priority = type;
-
         }
         
         public static void UpdateTaskDueDate(Category category)
         {
             Console.Clear();
-
             var taskStrings = category.Tasks.Select(task => task.ToString()).ToList();
-            var selectedTask = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Which task would you like to change the due date for?")
-                    .PageSize(10)
-                    .AddChoices(taskStrings));
-
-            int selectedIndex = taskStrings.IndexOf(selectedTask);
+            var selectedTask = PromptUtilities.PromptSelection("Which task would you like to change the due date for?", taskStrings);
+            
+            var selectedIndex = taskStrings.IndexOf(selectedTask);
             var taskToUpdate = category.GetSingleTask(selectedIndex);
-
-            var newDueDate = AnsiConsole.Ask<DateTime>("Enter the new due date (yyyy-mm-dd):");
+            var newDueDate = GetDate();
             taskToUpdate.ChangeDueDate(newDueDate);
 
             AnsiConsole.MarkupLine("[green]Date has been changed[/]");
-            Thread.Sleep(1500);
+            Thread.Sleep(Delay);
         }
         
         public static void MoveTask(Category category, List<Category> categories)
         {
+            Console.Clear();
             if (categories.Count == 1)
             {
-                AnsiConsole.MarkupLine("[red]You only have one category[/]");
-                Thread.Sleep(1500);
+                AnsiConsole.MarkupLine("[bold red]You only have one category[/]");
+                Thread.Sleep(Delay);
                 return;
             }
 
             // Get the task to move
             Console.Clear();
             var taskStrings = category.Tasks.Select(task => task.ToString()).ToList();
-            var selectedTask = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Which task would you like to move?")
-                    .PageSize(10)
-                    .AddChoices(taskStrings));
-
-            int selectedIndex = taskStrings.IndexOf(selectedTask);
+            var selectedTask = PromptUtilities.PromptSelection("Which task would you like to move?", taskStrings);
+            var selectedIndex = taskStrings.IndexOf(selectedTask);
             var taskToMove = category.GetSingleTask(selectedIndex);
 
             Console.Clear();
             // Get the index of category
             var categoryStrings = categories.Select(cat => cat.ToString()).ToList();
-            var selectedCategory = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Which category would you like to move the task to?")
-                    .PageSize(10)
-                    .AddChoices(categoryStrings));
-
-            int categoryIndex = categoryStrings.IndexOf(selectedCategory);
+            var selectedCategory = PromptUtilities.PromptSelection("Which category would you like to move the task to?",
+                categoryStrings);
+            var categoryIndex = categoryStrings.IndexOf(selectedCategory);
 
             // Loop if the user selects the same category
             while (categories[categoryIndex].Equals(category))
             {
                 AnsiConsole.MarkupLine("[red]You can't select the same category.[/]");
-                selectedCategory = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("Which category would you like to move the task to?")
-                        .PageSize(10)
-                        .AddChoices(categoryStrings));
+                selectedCategory = PromptUtilities.PromptSelection("Which category would you like to move the task to?",
+                    categoryStrings);
                 categoryIndex = categoryStrings.IndexOf(selectedCategory);
             }
 
@@ -138,26 +103,37 @@ namespace ReminderApp
             category.RemoveTask(taskToMove);
 
             AnsiConsole.MarkupLine($"[green]Task was successfully moved into {moveIntoCategory.Title}[/]");
-            Thread.Sleep(2500);
+            Thread.Sleep(Delay);
         }
-
         private static DateTime GetDate()
         {
-            DateTime date;
+            var promptTitle = new Rule("[bold blue]Task Due Date[/]").LeftJustified();
+            
+            var promptSubtitle = new Markup($"[grey62]Please enter a date and time in the format: [/][bold cyan]dd/MM/yyyy hh:mm am/pm[/][grey62].[/]").LeftJustified();
+
+            AnsiConsole.Write(promptTitle);
+            AnsiConsole.Write(promptSubtitle);
+        
+            var dateString = AnsiConsole.Ask<string>($"[bold green]\nEnter Date and Time[/]");
+        
             while (true)
             {
-                var input = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Enter a date (e.g., DD-MM-YYYY)")
-                        .Validate(value => DateTime.TryParseExact(value, "dd-mm-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out _) ?
-                            ValidationResult.Success() : ValidationResult.Error("[red]Invalid date format[/]")));
-
-                if (DateTime.TryParseExact(input, "dd-mm-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out date))
+                if (DateTime.TryParse(dateString, out var userDate))
                 {
-                    break;
+                    if (userDate >= DateTime.Now)
+                    {
+                        return userDate;
+                    }
+        
+                    AnsiConsole.MarkupLine("[bold red]You can't set a due date in the past![/]");
                 }
+                else
+                {
+                    AnsiConsole.MarkupLine("[bold red]Not a valid date and time format! Please try again.[/]");
+                }
+        
+                dateString = AnsiConsole.Ask<string>($"[bold green]Enter Date and Time[/]");
             }
-
-            return date;
         }
     }
 }

@@ -2,16 +2,16 @@
 
 public class Category
 {
-    private List<CategoryTask> _tasks = new();
+    private List<Task> _tasks = new();
 
     public string Title { get; set; }
 
-    public List<CategoryTask> Tasks
+    public List<Task> Tasks
     {
         get
         {
             // Gets the tracked tasks ordered by its priority and then by its TimeSpan.
-            _tasks = _tasks.OrderBy(task => (int)task.Priority).ThenBy(task => task.TimeSpan).ToList();
+            _tasks = _tasks.OrderBy(task => (int)task.Priority).ThenBy(task => task.TimeRemainingTimeSpan).ToList();
             return _tasks;
         }
     }
@@ -21,24 +21,24 @@ public class Category
         Title = title;
     }
 
-    public bool AddTask(CategoryTask task)
+    public bool AddTask(Task task)
     {
         Tasks.Add(task);
         return true;
     }
 
-    public bool RemoveTask(CategoryTask task)
+    public bool RemoveTask(Task task)
     {
         return Tasks.Remove(task);
     }
 
     
-    public CategoryTask GetSingleTask(int index)
+    public Task GetSingleTask(int index)
     {
         return (index < 0 || index > Tasks.Count) ? throw new IndexOutOfRangeException("That index is out of range") : Tasks[index];
     }
     
-    public List<CategoryTask> GetAllTasks()
+    public List<Task> GetAllTasks()
     {
         return _tasks;
     }
